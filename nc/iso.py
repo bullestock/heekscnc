@@ -5,7 +5,7 @@
 #
 # Hirutso Enni, 2009-01-13
 
-import nc
+from nc import *
 import math
 from format import Format
 from format import *

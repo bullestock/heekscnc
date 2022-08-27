@@ -6,7 +6,7 @@
 #
 # Hirutso Enni, 2009-01-13
 
-import nc
+from nc import *
 import math
 import circular_pocket as circular
 

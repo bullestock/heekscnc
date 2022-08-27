@@ -1,4 +1,4 @@
-import nc
+from nc import *
 
 units = 1.0
 
