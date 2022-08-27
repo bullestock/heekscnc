@@ -142,10 +142,10 @@ static void ClearErrorAndOutputFiles()
 
 	// clear the error and output files
 	{
-		ofstream ofs(Ttc(errors_path.GetFullPath().c_str()));
+		std::ofstream ofs(Ttc(errors_path.GetFullPath().c_str()));
 	}
 	{
-		ofstream ofs(Ttc(output_path.GetFullPath().c_str()));
+		std::ofstream ofs(Ttc(output_path.GetFullPath().c_str()));
 	}
 }
 
@@ -159,7 +159,7 @@ static bool ProcessErrorAndOutputFiles()
 	wxFileName errors_path(standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
 	wxFileName output_path(standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
 
-	ifstream ifs(Ttc(errors_path.GetFullPath().c_str()));
+	std::ifstream ifs(Ttc(errors_path.GetFullPath().c_str()));
 	if (!ifs)
 	{
 #ifdef UNICODE

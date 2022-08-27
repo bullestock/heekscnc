@@ -44,10 +44,6 @@
 
 #include <GCE2d_MakeSegment.hxx>
 
-#include <Handle_Geom_TrimmedCurve.hxx>
-#include <Handle_Geom_CylindricalSurface.hxx>
-#include <Handle_Geom2d_TrimmedCurve.hxx>
-#include <Handle_Geom2d_Ellipse.hxx>
 
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
