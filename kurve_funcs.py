@@ -251,7 +251,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         
     if direction != "on":
         if direction != "left" and direction != "right":
-            raise "direction must be left or right", direction
+            raise Exception("direction '%s' must be left or right" % direction)
 
         # get tool diameter
         offset = radius + offset_extra
@@ -277,7 +277,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
                         using_area_for_offset = False
                         return                    
                     else:
-                        raise Exception, "couldn't offset kurve " + str(offset_curve)
+                        raise Exception("couldn't offset curve %s" % offset_curve)
             
     # extend curve
     if extend_at_start > 0.0:
@@ -302,7 +302,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
     tags = new_tags
 
     if offset_curve.getNumVertices() <= 1:
-        raise "sketch has no spans!"
+        raise Exception("sketch has no spans!")
 
     # do multiple depths
     depths = depthparams.get_depths()

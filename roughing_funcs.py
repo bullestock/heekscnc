@@ -13,7 +13,7 @@ def make_area_for_roughing(k):
     num_spans = kurve.num_spans(k)
 
     if num_spans == 0:
-        raise "sketch has no spans!"
+        raise Exception("sketch has no spans!")
 
     d, startx, starty, ex, ey, cx, cy = kurve.get_span(k, 0)
     d, sx, sy, endx, endy, cx, cy = kurve.get_span(k, num_spans - 1)

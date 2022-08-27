@@ -68,7 +68,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
    else:
       cutter = ocl.BullCutter(tool_diameter + mat_allowance, corner_radius, 100.0)
    if final_depth > start_depth:
-      raise 'final_depth > start_depth'
+      raise Exception('final_depth > start_depth')
    height = start_depth - final_depth
    zsteps = int( height / math.fabs(step_down) + 0.999999 )
    zstep_down = height / zsteps
@@ -161,7 +161,7 @@ def waterline( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1
    s = STLSurfFromFile(filepath)
 
    if final_depth > start_depth:
-      raise 'final_depth > start_depth'
+      raise Exception('final_depth > start_depth')
    height = start_depth - final_depth
    zsteps = int( height / math.fabs(step_down) + 0.999999 )
    zstep_down = height / zsteps
