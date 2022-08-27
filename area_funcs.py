@@ -489,7 +489,8 @@ def zigzag(a, stepover, zig_unidirectional):
 
     reorder_zigs()
 
-def pocket(a,tool_radius, extra_offset, stepover, depthparams, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional', entry_style = 'plunge'):
+def pocket(a,tool_radius, extra_offset, stepover, depthparams, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,
+           start_point=None, cut_mode = 'conventional', entry_style = 'plunge'):
     global tool_radius_for_pocket
     global area_for_feed_possible
     
