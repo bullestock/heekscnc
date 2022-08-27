@@ -253,7 +253,9 @@ public:
 		wxFile ofs(xml_file_str.c_str());
 		if(!ofs.IsOpened())
 		{
-			wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + xml_file_str);
+			wxString msg(_("Couldn't open file") + _T(" - ") + xml_file_str + _T(" [%d]"));
+			msg.Printf(msg, ofs.GetLastError());
+			wxMessageBox(msg);
 			return;
 		}
 
