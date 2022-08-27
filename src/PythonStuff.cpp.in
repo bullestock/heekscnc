@@ -19,21 +19,21 @@
 //static
 bool CPyProcess::redirect = false;
 
-CPyProcess::CPyProcess(void)
+CPyProcess::CPyProcess()
 {
-  m_pid = 0;
-  wxProcess(heeksCAD->GetMainFrame());
-  Connect(wxEVT_TIMER, wxTimerEventHandler(CPyProcess::OnTimer));
-  m_timer.SetOwner(this);
-
+	m_pid = 0;
+	wxProcess(heeksCAD->GetMainFrame());
+	Connect(wxEVT_TIMER, wxTimerEventHandler(CPyProcess::OnTimer));
+	m_timer.SetOwner(this);
 }
 
 void CPyProcess::OnTimer(wxTimerEvent& event)
 {
-  HandleInput();
+	HandleInput();
 }
 
-void CPyProcess::HandleInput(void) {
+void CPyProcess::HandleInput()
+{
 	wxInputStream *m_in, *m_err;
 
 	m_in = GetInputStream();
@@ -59,6 +59,7 @@ void CPyProcess::HandleInput(void) {
 		}
 		if (s.Length() > 0) {
 			wxLogMessage(_T("%s"), s.c_str());
+			wprintf(wxT("Python error output:\n") + s + wxT("\n"));
 		}
 	}
 }
@@ -75,20 +76,19 @@ void CPyProcess::Execute(const wxChar* cmd)
 	}
 
 	if (redirect) {
-		m_timer.Start(100);   //msec
+		m_timer.Start(100);	  //msec
 	}
 }
 
-void CPyProcess::Cancel(void)
+void CPyProcess::Cancel()
 {
 	if (m_pid)
 	{
 		wxKillError kerror;
 		wxSignal sig = wxSIGTERM;
-		int retcode;
 
 		if ( wxProcess::Exists(m_pid) ) {
-			retcode = wxKill(m_pid, sig, &kerror, wxKILL_CHILDREN);
+			wxKill(m_pid, sig, &kerror, wxKILL_CHILDREN);
 			switch (kerror) {
 			case wxKILL_OK:
 				wxLogMessage(_T("sent signal %d to process %d"),sig, m_pid);
@@ -99,10 +99,10 @@ void CPyProcess::Cancel(void)
 			case wxKILL_ACCESS_DENIED:
 				wxLogMessage(_T("sending signal %d to process %d - access denied"),sig, m_pid);
 				break;
-			case wxKILL_BAD_SIGNAL:      // no such signal
+			case wxKILL_BAD_SIGNAL:		 // no such signal
 				wxLogMessage(_T("no such signal: %d"),sig);
 				break;
-			case wxKILL_ERROR:            // another, unspecified error
+			case wxKILL_ERROR:			  // another, unspecified error
 				wxLogMessage(_T("unspecified error sending signal %d to process %d"),sig, m_pid);
 				break;
 			}
@@ -209,12 +209,17 @@ protected:
 	static CPyBackPlot* m_object;
 
 public:
-	CPyBackPlot(const CProgram* program, HeeksObj* into, const wxChar* filename): m_program(program), m_into(into),m_filename(filename),m_busy_cursor(NULL) { m_object = this; }
-	~CPyBackPlot(void) { m_object = NULL; }
+	CPyBackPlot(const CProgram* program, HeeksObj* into, const wxChar* filename)
+		: m_program(program), m_into(into),m_filename(filename),m_busy_cursor(NULL)
+	{
+		m_object = this;
+	}
 
-	static void StaticCancel(void) { if (m_object) m_object->Cancel(); }
+	~CPyBackPlot() { m_object = NULL; }
 
-	void Do(void)
+	static void StaticCancel() { if (m_object) m_object->Cancel(); }
+
+	void Do()
 	{
 		ClearErrorAndOutputFiles();
 
@@ -226,25 +231,30 @@ public:
 		} // End if - then
 		else
 		{
-			#ifdef WIN32
-				Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\nc_read.bat\" ") + m_program->m_machine.reader + _T(" \"") + m_filename + _T("\""));
-			#else
-				#ifdef RUNINPLACE
-					wxString path(theApp.GetDllFolder() +_T("/"));
-				#else
-					#ifdef CMAKE_UNIX
-						wxString path(_T("/usr/@LIB_INSTALL_DIR@/heekscnc/"));
-					#else
-						wxString path(theApp.GetDllFolder() + _T("/../heekscnc/"));
-					#endif
-				#endif
+#ifdef WIN32
+			Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\nc_read.bat\" ") + m_program->m_machine.reader + _T(" \"") + m_filename + _T("\""));
+#else
+# ifdef RUNINPLACE
+			wxString path(theApp.GetDllFolder() +_T("/"));
+# else
+#  ifdef CMAKE_UNIX
+			wxString path(_T("/usr/@LIB_INSTALL_DIR@/heekscnc/"));
+#  else
+			wxString path(theApp.GetDllFolder() + _T("/../heekscnc/"));
+# endif
+#endif
 
-				Execute(wxString(_T("python \"")) + path + wxString(_T("backplot.py\" \"")) + m_program->m_machine.reader + wxString(_T("\" \"")) + m_filename + wxString(_T("\"")) );
-			#endif
+			wxString cmd = wxString(_T("python \"")) + path + wxString(_T("backplot.py\" \"")) +
+			   m_program->m_machine.reader + wxString(_T("\" \"")) + m_filename + wxString(_T("\""));
+			wprintf(wxT("Command: ") + cmd + wxT("\n"));
+			Execute(cmd);
+#endif
 		} // End if - else
 	}
-	void ThenDo(void)
+
+	void ThenDo()
 	{
+		std::cout << "ThenDo" << std::endl;
 		if (!ProcessErrorAndOutputFiles())
 			return;
 
@@ -291,11 +301,11 @@ public:
 		m_object = this;
 	}
 
-	~CPyPostProcess(void) { m_object = NULL; }
+	~CPyPostProcess() { m_object = NULL; }
 
-	static void StaticCancel(void) { if (m_object) m_object->Cancel(); }
+	static void StaticCancel() { if (m_object) m_object->Cancel(); }
 
-	void Do(void)
+	void Do()
 	{
 		ClearErrorAndOutputFiles();
 
@@ -309,14 +319,14 @@ public:
 		wxFileName path(standard_paths.GetTempDir().c_str(), _T("post.py"));
 
 #ifdef WIN32
-        Execute(wxString(_T("\"")) + theApp.GetDllFolder() + wxString(_T("\\post.bat\" \"")) + path.GetFullPath() + wxString(_T("\"")));
+		Execute(wxString(_T("\"")) + theApp.GetDllFolder() + wxString(_T("\\post.bat\" \"")) + path.GetFullPath() + wxString(_T("\"")));
 #else
 
-        wxString post_path = wxString(_T("python ")) + path.GetFullPath();
+		wxString post_path = wxString(_T("python ")) + path.GetFullPath();
 		Execute(post_path);
 #endif
 	}
-	void ThenDo(void)
+	void ThenDo()
 	{
 		if (!ProcessErrorAndOutputFiles())
 			return;
@@ -359,9 +369,9 @@ bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath, const
 
 		if(!write_python_file(file_str.GetFullPath()))
 		{
-		    wxString error;
-		    error << _T("couldn't write ") << file_str.GetFullPath();
-		    wxMessageBox(error.c_str());
+			wxString error;
+			error << _T("couldn't write ") << file_str.GetFullPath();
+			wxMessageBox(error.c_str());
 		}
 		else
 		{
@@ -413,7 +423,7 @@ bool HeeksPyBackplot(const CProgram* program, HeeksObj* into, const wxString &fi
 	return false;
 }
 
-void HeeksPyCancel(void)
+void HeeksPyCancel()
 {
 	CPyBackPlot::StaticCancel();
 	CPyPostProcess::StaticCancel();
@@ -422,47 +432,47 @@ void HeeksPyCancel(void)
 
 // create a temporary ngc file
 // make your favorite machine load it
-void CSendToMachine::Cancel(void) { CPyProcess::Cancel(); }
+void CSendToMachine::Cancel() { CPyProcess::Cancel(); }
 void CSendToMachine::SendGCode(const wxChar *gcode)
-	{
-		wxBusyCursor wait; // show an hour glass until the end of this function
+{
+	wxBusyCursor wait; // show an hour glass until the end of this function
 
 #if wxCHECK_VERSION(3, 0, 0)
-		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+	wxStandardPaths& standard_paths = wxStandardPaths::Get();
 #else
-		wxStandardPaths standard_paths;
+	wxStandardPaths standard_paths;
 #endif
-		wxFileName ngcpath(theApp.m_program->GetOutputFileName());
-		ngcpath.SetPath(standard_paths.GetTempDir());
+	wxFileName ngcpath(theApp.m_program->GetOutputFileName());
+	ngcpath.SetPath(standard_paths.GetTempDir());
 
-		// Append a number to 'prevent' from overwriting a file on machine
-		// FIXME Reset m_serial on new project (or opened)
-		if(m_serial)
-		{
-			ngcpath.SetName(ngcpath.GetName() + wxString::Format(wxT("-%d"), m_serial));
-		}
-		m_serial++;
+	// Append a number to 'prevent' from overwriting a file on machine
+	// FIXME Reset m_serial on new project (or opened)
+	if(m_serial)
+	{
+		ngcpath.SetName(ngcpath.GetName() + wxString::Format(wxT("-%d"), m_serial));
+	}
+	m_serial++;
 
-		// write the ngc file
+	// write the ngc file
+	{
+		wxFile ofs(ngcpath.GetFullPath(), wxFile::write);
+		if(!ofs.IsOpened())
 		{
-			wxFile ofs(ngcpath.GetFullPath(), wxFile::write);
-			if(!ofs.IsOpened())
-			{
-				wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + ngcpath.GetFullPath());
-				return;
-			}
-			ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
+			wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + ngcpath.GetFullPath());
+			return;
 		}
-		wxLogDebug(_T("created '%s')"), ngcpath.GetFullPath().c_str());
+		ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
+	}
+	wxLogDebug(_T("created '%s')"), ngcpath.GetFullPath().c_str());
 
 #ifdef WIN32
-        Execute(wxString(_T("\"")) + theApp.GetDllFolder() +wxString(_T("\\")) + m_command + wxString(_T("\" \"")) + ngcpath.GetFullPath() + wxString(_T("\"")));
+	Execute(wxString(_T("\"")) + theApp.GetDllFolder() +wxString(_T("\\")) + m_command + wxString(_T("\" \"")) + ngcpath.GetFullPath() + wxString(_T("\"")));
 #else
-        wxString sendto_cmdline = m_command + wxT(" \"") + ngcpath.GetFullPath() + wxT("\"");
-        wxLogDebug(_T("executing '%s')"), sendto_cmdline.c_str());
-		Execute(sendto_cmdline);
+	wxString sendto_cmdline = m_command + wxT(" \"") + ngcpath.GetFullPath() + wxT("\"");
+	wxLogDebug(_T("executing '%s')"), sendto_cmdline.c_str());
+	Execute(sendto_cmdline);
 #endif
-	}
+}
 
 
 int CSendToMachine::m_serial;
@@ -485,14 +495,14 @@ void CSendToMachine::GetOptions(std::list<Property *> *list)
 // static
 void CSendToMachine::ReadFromConfig()
 {
-        CNCConfig config;
-        config.Read(_T("SendToMachineCommand"), &m_command , _T("axis-remote"));
+	CNCConfig config;
+	config.Read(_T("SendToMachineCommand"), &m_command , _T("axis-remote"));
 }
 // static
 void CSendToMachine::WriteToConfig()
 {
-        CNCConfig config;
-        config.Write(_T("SendToMachineCommand"), m_command);
+	CNCConfig config;
+	config.Write(_T("SendToMachineCommand"), m_command);
 }
 
 
@@ -509,4 +519,3 @@ bool HeeksSendToMachine(const wxString &gcode)
 
 	return false;
 }
-
