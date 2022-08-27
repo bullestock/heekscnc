@@ -22,6 +22,8 @@ bool CPyProcess::redirect = false;
 CPyProcess::CPyProcess()
 {
 	m_pid = 0;
+	wxString path(_T("/usr/@LIB_INSTALL_DIR@/heekscnc/nc"));
+	m_env.env["PYTHONPATH"] = path;
 	wxProcess(heeksCAD->GetMainFrame());
 	Connect(wxEVT_TIMER, wxTimerEventHandler(CPyProcess::OnTimer));
 	m_timer.SetOwner(this);
@@ -70,7 +72,7 @@ void CPyProcess::Execute(const wxChar* cmd)
 		Redirect();
 	}
 	// make process group leader so Cancel kan terminate process including children
-	m_pid = wxExecute(cmd, wxEXEC_ASYNC|wxEXEC_MAKE_GROUP_LEADER, this);
+	m_pid = wxExecute(cmd, wxEXEC_ASYNC|wxEXEC_MAKE_GROUP_LEADER, this, &m_env);
 	if (!m_pid) {
 	  wxLogMessage(_T("could not execute '%s'"),cmd);
 	}
